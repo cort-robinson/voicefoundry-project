@@ -1,5 +1,6 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
+const isWord = require('is-word');
 let response;
 
 /**
@@ -20,6 +21,8 @@ exports.lambdaHandler = async (event, context) => {
 
         const letterMap = { '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz' };
 
+        // gets all the possible letter combinations of a given number
+        // currently does not support numbers with 1's or 0's since they are not included in the letterMap
         const letterCombos = function (number) {
             let len = number.length, ans = [];
             if (!len) return [];
@@ -40,13 +43,33 @@ exports.lambdaHandler = async (event, context) => {
 
         // phoneNumber = event.pathParameters.phoneNumber;
         phoneNumber = '1-800-356-9377';
-        // remove all non-numeric characters then remove all but last 7 digits
-        reducedNumber = phoneNumber.replace(/\D/g, '').slice(-7);
+        // remove all non-numeric characters
+        reducedNumber = phoneNumber.replace(/\D/g, '');
+
+        wordsList = [];
+
+        wordsList.push(...letterCombos(reducedNumber.slice(-7)));
+        wordsList.push(...letterCombos(reducedNumber.slice(-6)));
+        wordsList.push(...letterCombos(reducedNumber.slice(-5)));
+        wordsList.push(...letterCombos(reducedNumber.slice(-4)));
+        wordsList.push(...letterCombos(reducedNumber.slice(-3)));
+
+        // const isWord = require('is-word');
+
+        // initialize is-word import
+        const englishWords = isWord('american-english');
+
+        // filter out letter combinations that are not english words and get the first 5
+        const validWords = wordsList.filter(word => englishWords.check(word));
+        if (validWords.length > 5) validWords.splice(5);
+
+        // for testing purposes
+        // console.log(validWords);
 
         response = {
             'statusCode': 200,
             'body': JSON.stringify({
-                message: letterCombos(reducedNumber),
+                message: validWords,
                 // location: ret.data.trim()
             })
         };
