@@ -18,10 +18,10 @@ Resources:
       Architectures:
       - x86_64
       Events:
-        HelloWorld:
+        NumberGenerator:
           Type: Api
           Properties:
-            Path: /hello
+            Path: /number
             Method: get
     Metadata:
       SamResourceId: HelloWorldFunction
