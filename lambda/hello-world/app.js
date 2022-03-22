@@ -52,8 +52,12 @@ exports.lambdaHandler = async (event, context) => {
         let phoneNumber = null;
         let validWords = null;
 
-        if (event.queryStringParameters && event.queryStringParameters.phoneNumber) {
-            phoneNumber = event.queryStringParameters.phoneNumber;
+        // use try catch in event no number is provided
+        try {
+            // check if phoneNumber given through queryString or contact-flow
+            if (event.queryStringParameters && event.queryStringParameters.phoneNumber) {
+                phoneNumber = event.queryStringParameters.phoneNumber;
+            } else phoneNumber = event['Details']['ContactData']['CustomerEndpoint']['Address'];
 
             // remove all non-numeric characters from phoneNumber
             const reducedNumber = phoneNumber.replace(/\D/g, '');
@@ -73,6 +77,8 @@ exports.lambdaHandler = async (event, context) => {
             // filter out letter combinations that are not english words and get the first 5
             validWords = wordsList.filter(word => englishWords.check(word));
             if (validWords.length > 5) validWords.splice(5);
+        } catch (err) {
+            console.log('no number given');
         }
 
         // parameters for dynamoDB query
